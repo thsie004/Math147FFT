@@ -2,7 +2,7 @@
 \beamer@sectionintoc {1}{Introduction}{1}{0}{1}
 \beamer@sectionintoc {2}{Operations on Polynomials}{6}{0}{2}
 \beamer@sectionintoc {3}{Transformation 1.0}{14}{0}{3}
-\beamer@sectionintoc {4}{Roots of Unity}{23}{0}{4}
-\beamer@sectionintoc {5}{Transformation 2.0}{30}{0}{5}
-\beamer@sectionintoc {6}{The DFT Matrix}{35}{0}{6}
-\beamer@sectionintoc {7}{Bringing it Back}{40}{0}{7}
+\beamer@sectionintoc {4}{Roots of Unity}{25}{0}{4}
+\beamer@sectionintoc {5}{Transformation 2.0}{32}{0}{5}
+\beamer@sectionintoc {6}{The DFT Matrix}{37}{0}{6}
+\beamer@sectionintoc {7}{Bringing it Back}{42}{0}{7}

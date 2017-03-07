@@ -201,17 +201,18 @@ Objective: convert coefficients to samples efficiently as to avoid $O(N^2)$ runn
 \end{centering}
 
 \bigskip
-This calculates $N$ samples at $N$ distinct points $X = \{x_0,\cdots,x_{N-1}\}$ with a running-time of $O(n^2)$...
+This calculates $N$ samples at $N$ distinct points in the set $X = \{x_0,\cdots,x_{N-1}\}$ with a running-time of $O(N^2)$...
 \end{frame}
 
 \begin{frame}
-Divide and conquer! 
-\bigskip
+\onslide<+->{Divide and conquer! (this is where we assume $N$ is a power of 2)}
 
-To evaluate our polynomial $P(x)$ at the point $x$, we can define the following:
+\bigskip
+\onslide<+->{
+To evaluate our polynomial $P(x)$ at the point $x$, we can define the following:}
 \begin{itemize}
-\item{$P_{\text{even}}(x)=\displaystyle \sum_{k=0}^{(N-1)/2} a_{2k}x^k$}
-\item{$P_{\text{odd}}(x)=\displaystyle \sum_{k=0}^{(N-1)/2} a_{2k+1}x^k$}
+\item{$P_{\text{even}}(x)=\displaystyle \sum_{k=0}^{[(N-1)/2]} a_{2k}x^k$}
+\item{$P_{\text{odd}}(x)=\displaystyle \sum_{k=0}^{[(N-1)/2]} a_{2k+1}x^k$}
 \item{$P(x) = P_{\text{even}}(x^2)+x\cdot P_{\text{odd}}(x^2)$}
 \end{itemize}
 \onslide<+->{Do this for every $x$ we want to sample... $N$ of them.}
@@ -224,7 +225,7 @@ Let $T$ measure the running-time of calculating $P(x)$ for every $x$ in $X$, the
 T(N,|X|) &=& 2T(\frac{N}{2}, |X|) + O(|X|)\\
 &=& 2\left[2T(\frac{N}{4}, |X|)+O(|X|)\right]+O(|X|)\\
 &\vdots&\\
-&=& 2^{\log_2{N}}\mathbf{T(1,|X|)}+\sum_{l=0}^{\log_2{N}}2^lO(|X|)\\
+&=& 2^{\log_2{N}}T(1,\mathbf{|X|})+\sum_{l=0}^{\log_2{N}}2^lO(|X|)\\
 &=& \mathbf{N^2}+O(|X|\log_2{N}).
 \end{eqnarray*}
 }
@@ -243,7 +244,7 @@ T(N,|X|) &=& 2T(\frac{N}{2}, |X|) + O(|X|)\\
 \onslide<+->{\{i,-1,-i,1\} &=& \{e^{2\pi i\frac{1}{4}},e^{2\pi i\frac{2}{4}},e^{2\pi i\frac{3}{4}}, e^{2\pi i\frac{4}{4}}\}, N=4\\
 &\vdots&}
 \end{eqnarray*}
-\onslide<+->{Eventually end up with \textbf{the Nth roots of unity} $\{e^{2\pi i\frac{k}{N}}\}_{k=0}^{N-1}$}
+\onslide<+->{Eventually end up with \textbf{the Nth roots of unity} $\{e^{2\pi i\frac{k}{N}}\}_{k=0}^{N-1}$.}
 
 \onslide<+->{Key property: any such root computes to 1 when raised to the Nth power.}
 \end{frame}
