@@ -1,0 +1,333 @@
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%                                           %%%%%%%%%%%
+%%%%%%%%%%%   Various Settings Below   %%%%%%%%%%%
+%%%%%%%%%%%                                           %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+
+
+\documentclass{beamer}
+
+\usetheme{bjeldbak}
+
+
+\usepackage[english]{babel}
+% or whatever
+\usepackage[makeroom]{cancel}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+\usepackage{graphicx}
+\definecolor{mygray}{gray}{0.7}
+\usepackage{tikz}
+\usetikzlibrary{matrix,arrows}
+\tikzset{node distance=2cm, auto}
+
+
+\title[] % (optional, use only with long paper titles)
+{The Fast Fourier Transform}
+
+%\subtitle{Your Subtitle}% You don't need this
+
+\author[] % (optional, use only with lots of authors)
+{}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute[] % (optional, but mostly needed)
+{
+  \inst{1}%
+	
+  \and
+  \inst{2}%
+  
+ }
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date[Mathematics 149C Conference] % (optional, should be abbreviation of conference name)
+{Mathematics 149C Conference\\Department of Mathematics - Riverside, California\\June 8th, 2016}
+% - Either use conference name or its abbreviation.
+% - Not really informative to the audience, more for people (including
+%   yourself) who are reading the slides online
+
+
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+\beamerdefaultoverlayspecification{<+->}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%                                           %%%%%%%%%%%
+%%%%%%%%%%%   Various Settings Above   %%%%%%%%%%%
+%%%%%%%%%%%                                           %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%                                 %%%%%%%%%%%
+%%%%%%%%%%%   Begin Document   %%%%%%%%%%%
+%%%%%%%%%%%                                 %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%                          %%%%%%%%%%%
+%%%%%%%%%%%   New Section   %%%%%%%%%%%
+%%%%%%%%%%%                          %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+
+
+
+\section[intro]{Introduction} %If the names are too long, you can abbreviate in this way.
+
+\begin{frame}
+The Fast Fourier Transform
+\begin{itemize}
+\item First used by Carl Friedrich Gauss but went unnoticed.
+\item James Cooley and John Tukey independently discovered the Cooley-Tukey algorithm in 1965.
+\item Improves the $O(N^2)$ running time it takes to perform DFT to $O(N\log_2{N})$ (regarding complex addition and multiplication).
+\item
+\begin{tabular}{|p{1cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+&n=1000&n=$10^6$&n=$10^9$\\
+\hline
+$n^2$&$10^6$&$10^{12}$&$10^{18}$\\
+\hline
+$n\log_2{n}$&\textasciitilde$10^4$&\textasciitilde$2\cdot10^7$&\textasciitilde$3\cdot10^{10}$\\
+\hline
+\end{tabular}
+\end{itemize}
+
+\end{frame}
+
+\section[Polynomials]{Operations on Polynomials}
+
+\begin{frame}
+A degree $N-1$ polynomial is given by $P(x) = a_0+a_1x+a_2x^2+\cdots+a_{N-1}x^{N-1}$.\\
+\bigskip
+\large{Other representations:}
+\begin{itemize}
+\item{\textbf{Coefficient vector:}} A vector $(a_0,a_1,\cdots,a_{N-1})$ in a space of monomials.
+\item{\textbf{Roots:}} Given roots of a polynomial, we can write $P(x) = k\prod_{n=0}^{N-1}(x-r_n)$ for some constant $k$.
+\item{\textbf{Samples:}} We can also take $N$ distinct pairs of $(x_n,y_n=P(x_n))$ to uniquely determine the polynomial $P(x)$ by Lagrange polynomial interpolation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+There are three main things we want to do with polynomials, namely:
+\begin{itemize}
+\item{\textbf{Evaluation:}} Evalutae the polynomial at a point in its domain.
+\item{\textbf{Addition:}} Add two polynomials together.
+\item{\textbf{Multiplication:}} Multiply two polynomials together. 
+Note that polynomial multiplication in the coefficient vector form actually corresponds to the finite discrete convolution of two vectors in their inner product space. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+
+\begin{tabular}{|p{2cm}||p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\multicolumn{4}{|c|}{Running-time for each operation on degree $N-1$ polynomials}\\
+\hline
+&Coeffcients&Roots&Samples\\
+\hline\hline
+Evaluation&$O(N)$&$O(N)$&$O(N^2)$\\
+\hline
+Addition&$O(N)$&N/A&$O(N)$\\
+\hline
+Multiplication&$O(N^2)$&$O(N)$&$O(N)$\\
+\hline
+\end{tabular}
+
+\bigskip
+Objective: convert coefficients to samples efficiently as to avoid $O(N^2)$ running-time.
+\end{frame}
+
+\section[Transformation 1.0]{Transformation 1.0}
+
+\begin{frame}
+	We can sample $P(x) = a_0+a_1x+a_2x^2+\cdots+a_{N-1}x^{N-1}$ by doing \\
+	\bigskip
+	\begin{centering}{
+		$\begin{pmatrix}
+			1 & x_0 & x_0^2 & \cdots & x_0^{N-1}\\ 
+			1 & x_1 & x_1^2& \cdots & x_1^{N-1}\\ 
+			\vdots & \vdots & \vdots & \ddots & \vdots\\ 
+			1 & x_{N-1}  & x_{N-1}^{2}& \cdots & x_{N-1}^{N-1}
+		\end{pmatrix}
+		\begin{pmatrix}
+			a_0\\ 
+			a_1\\ 
+			\vdots\\ 
+			a_{N-1}
+		\end{pmatrix}
+		=
+		\begin{pmatrix}
+			y_0\\ 
+			y_1\\ 
+			\vdots\\ 
+			y_{N-1}
+		\end{pmatrix}$.
+	}
+
+\end{centering}
+
+\bigskip
+This calculates $N$ samples at $N$ distinct points $X = \{x_0,\cdots,x_{N-1}\}$ with a running-time of $O(n^2)$...
+\end{frame}
+
+\begin{frame}
+Divide and conquer! 
+\bigskip
+
+To evaluate our polynomial $P(x)$ at the point $x$, we can define the following:
+\begin{itemize}
+\item{$P_{\text{even}}(x)=\displaystyle \sum_{k=0}^{(N-1)/2} a_{2k}x^k$}
+\item{$P_{\text{odd}}(x)=\displaystyle \sum_{k=0}^{(N-1)/2} a_{2k+1}x^k$}
+\item{$P(x) = P_{\text{even}}(x^2)+x\cdot P_{\text{odd}}(x^2)$}
+\end{itemize}
+\onslide<+->{Do this for every $x$ we want to sample... $N$ of them.}
+\end{frame}
+
+\begin{frame}
+\onslide<+->{
+Let $T$ measure the running-time of calculating $P(x)$ for every $x$ in $X$, then we have that
+\begin{eqnarray*}
+T(N,|X|) &=& 2T(\frac{N}{2}, |X|) + O(|X|)\\
+&=& 2\left[2T(\frac{N}{4}, |X|)+O(|X|)\right]+O(|X|)\\
+&\vdots&\\
+&=& 2^{\log_2{N}}\mathbf{T(1,|X|)}+\sum_{l=0}^{\log_2{N}}2^lO(|X|)\\
+&=& \mathbf{N^2}+O(|X|\log_2{N}).
+\end{eqnarray*}
+}
+\onslide<+->{$O(N^2)$ again!}
+
+\onslide<+->{Root cause? This algorithm chokes when it has to evaluate monomials \textbf{for every element in the set}.}
+\end{frame}
+
+\section[Roots of Unity]{Roots of Unity}
+
+\begin{frame}
+\onslide<+->{What if there is a set that shrinks in size whenever we square each element?} 
+\begin{eqnarray*}
+\onslide<+->{\{1\} &=& \{e^{2\pi i\frac{1}{1}}\}, N=1}\\
+\onslide<+->{\{-1,1\} &=& \{e^{2\pi i\frac{1}{2}}, e^{2\pi i\frac{2}{2}}\}, N=2}\\
+\onslide<+->{\{i,-1,-i,1\} &=& \{e^{2\pi i\frac{1}{4}},e^{2\pi i\frac{2}{4}},e^{2\pi i\frac{3}{4}}, e^{2\pi i\frac{4}{4}}\}, N=4\\
+&\vdots&}
+\end{eqnarray*}
+\onslide<+->{Eventually end up with \textbf{the Nth roots of unity} $\{e^{2\pi i\frac{k}{N}}\}_{k=0}^{N-1}$}
+
+\onslide<+->{Key property: any such root computes to 1 when raised to the Nth power.}
+\end{frame}
+
+\section[Transformation 2.0]{Transformation 2.0}
+
+\begin{frame}
+\onslide<+->{Why not sample our polynomial at the Nth roots of unity?}
+\onslide<+->{
+\begin{eqnarray*}
+	T(N) &=& 2T(\frac{N}{2}) + O(N)\\
+	&=& 2\left[2T(\frac{N}{4})+O(\frac{N}{2})\right]+O(N)\\
+	&\vdots&\\
+	&=& 2^{\log_2{N}}{T(1)}+\sum_{l=0}^{\log_2{N}}2^lO(\frac{N}{2^l})\\
+	&=& N+O(N\log_2{N})
+\end{eqnarray*}
+}
+\onslide<+->{Hello, $O(N\log_2{N})$!}
+
+\onslide<+->{But what does converting polynomial forms have to do with FFT?}
+\end{frame}
+
+\section[The DFT Matrix]{The DFT Matrix}
+
+\begin{frame}
+\onslide<+->{Recall our choice to sample the polynomial on $\{e^{2\pi i\frac{k}{N}}\}_{k=0}^{N-1}$}
+\onslide<+->{, this gives us the following transformation:
+
+\bigskip
+\begin{centering}{
+		$\begin{pmatrix}
+		1 & (e^{2\pi i\frac{0}{N}})^1 & (e^{2\pi i\frac{0}{N}})^2 & \cdots & (e^{2\pi i\frac{0}{N}})^{N-1}\\ 
+		1 & (e^{2\pi i\frac{1}{N}})^1 & (e^{2\pi i\frac{1}{N}})^1 & \cdots & (e^{2\pi i\frac{1}{N}})^{N-1}\\ 
+		\vdots & \vdots & \vdots & \ddots & \vdots\\ 
+		1 & (e^{2\pi i\frac{N-1}{N}})^1  & (e^{2\pi i\frac{N-1}{N}})^{2}& \cdots & (e^{2\pi i\frac{N-1}{N}})^{N-1}
+		\end{pmatrix}
+		\begin{pmatrix}
+		a_0\\ 
+		a_1\\ 
+		\vdots\\ 
+		a_{N-1}
+		\end{pmatrix}$.\\
+}
+\end{centering}
+}
+\bigskip
+\onslide<+->{Now recall again the discrete Fourier coefficients $\displaystyle A_n = \frac{1}{N}\sum_{k=0}^{N-1} F(k)(e^{-2\pi i\frac{n}{N}})^{k}$ for $n$ running from $0$ to $N-1$.} 
+
+\onslide<+->{Replace $a_k$ with $\frac{1}{N}F(k)$ and take the conjugate of the DFT matrix then we have Cooley and Tukey's radix-2 FFT.}
+
+\end{frame}
+
+\section[Bringing it Back]{Bringing it Back}
+\begin{frame}
+\onslide<+->{After multiplication/convolution, we need to convert samples back into coefficients.}
+
+\onslide<+->{Luckily, this is easy to do!}
+
+\onslide<+->{
+	Let V be the DFT matrix as described earlier, then
+	\begin{equation*}
+		V^{-1} = \frac{1}{N}\bar{V},
+	\end{equation*}
+	which can be proven by showing that
+	\begin{equation*}
+		V\bar{V} = NI.
+	\end{equation*}
+}
+\onslide<+->{
+	Then $\vec{a} = V^{-1}\vec{y}$.
+}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%                              %%%%%%%%%%%
+%%%%%%%%%%%   End Document   %%%%%%%%%%%
+%%%%%%%%%%%                              %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+\end{document}
+
+
+
+
+
+
+
