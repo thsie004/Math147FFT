@@ -128,14 +128,14 @@ Recursively apply this method to $P_even$ and $P_odd$ and so on will allow us to
 Now it is important to note that we want to assume $n$ is a power of two, as the smallest subproblem we want to handle is evaluation of monomials. The assumption does very little to hurt the generality of this algorithm as one can always fill a coefficient vector with trailing zeroes up to the closest power of two and be happy that the algorithm applies well to it. 
 
 With this recursion in hand, we want to analyze the resulting runtime. Let $T$ measure the runtime of computing $P(x)$ for every $x$ in the set $X$ of points we want to sample our polynomial at, then we have the following recurrence equation relating the runtime of a problem to the runtime of its subproblems:
-\begin{eqnarray*} \label{recurrence}
-	T(n,|X|) &=& 2T(\frac{n}{2}, |X|) + O(|X|)\\
-	&=& 2\left[2T(\frac{n}{4}, |X|)+O(|X|)\right]+O(|X|)\\
-	&\vdots&\\
-	&=& 2^{\log_2{n}}T(1,|X|)+\sum_{l=0}^{(\log_2{n})-1}2^lO(|X|)\\
-	&=& n^2+O(|X|\log_2{n})\\
-	&=& O(n^2)
-\end{eqnarray*}
+\begin{eqnarray} 
+	T(n,|X|) &=& 2T(\frac{n}{2}, |X|) + O(|X|)\notag\\
+	&=& 2\left[2T(\frac{n}{4}, |X|)+O(|X|)\right]+O(|X|)\notag\\
+	&\vdots&\notag\\
+	&=& 2^{\log_2{n}}T(1,|X|)+\sum_{l=0}^{(\log_2{n})-1}2^lO(|X|) \label{recurrence}\\
+	&=& n^2+O(|X|\log_2{n})\notag\\
+	&=& O(n^2)\notag
+\end{eqnarray}
 where $n$ is the degree of the polynomial concerned in each stage. In the very first equality our problem on $P(x)$ gets divided into problems on $P_{even}(x)$ and $P_{odd}(x)$ at the cost of $O(|X|)$ time used to split and combine the subproblems back into the original one on $P(x)$ for every $x$ in $X$. By unrolling this recurrence equation we obtain the last equality.
 
 Although we ended with yet another $O(n^2)$ algorithm, an important insight we gained here is that we only have $O(n^2)$ runtime as a result of needing to evaluate monomials for every $x$ in $X$. This is the case as in general the size of $X$ does not reduce when one square each element in $X$; we only need to evaluate subproblems at $x^2$ for each layer of recursion we add as a result of how \eqref{split} was constructed.
@@ -166,9 +166,9 @@ e^{2\pi i\frac{8k}{8}} = (e^{2\pi i\frac{8}{8}})^k = (1)^k
 which is a result of Euler's formula. Geometrically we are spinning the point on the complex plane by its angle from $(1,0)$ and doubling the magnitude we spin it by in every subsequent spin until it eventually rests on $(1,0)$. 
 
 In general, the set 
-\begin{equation}\label{roots}
+\begin{equation*}
 \{e^{2\pi i\frac{k}{n}}, k = 0,1,...,n-1\}
-\end{equation}
+\end{equation*}
 where $n$ is a power of two reduces to $\{1\}$ when we take the $n^{th}$ power of each element, or equivalently, square each element $\log_2{n}$ times. Such set is what is known as the $n^{th}$ roots of unity as the $n^{th}$ power of any element evaluates to unity. 
 
 By sampling our polynomial over this specific set, we immediately see that every resulting subproblem, i.e. monomial, only has to be evaluated at $x=1$ instead of $n$ distinct values.
