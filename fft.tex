@@ -245,12 +245,12 @@ What this gives us is a way of convoluting two signals or waves represented by p
 \subsection{The Fast Fourier Transform}
 
 
-The discrete Fourier transform as described in \cite{text} is given by
+The inverse discrete Fourier transform as described in \cite{text} is given by
 \begin{eqnarray*}
-F(k) = \displaystyle \sum_{r=0}^{n-1} A_r e^{2\pi i\frac{k}{n}r}\\
-\text{where } A_r = \frac{1}{N} \displaystyle \sum_{k=0}^{n-1} F(k) e^{-2\pi i\frac{k}{n}r}.
+F(k) &=& \displaystyle \sum_{r=0}^{n-1} A_r e^{2\pi i\frac{k}{n}r}\\
+\text{where } A_r &=& \frac{1}{N} \displaystyle \sum_{k=0}^{n-1} F(k) e^{-2\pi i\frac{k}{n}r} \text{ are the Fourier coefficients}.
 \end{eqnarray*}
-This correspond exactly to the equation $\frac{1}{n}\bar{V}\vec{y}=\vec{a}$ in the previous subsection if we let $\vec{a} = (F(0),F(1),\cdots,F(k)) = \vec{F}$. Following this trend, the inverse opertaion would simply be $V\vec{F} = \vec{y}$. We have already shown that this transformation could be done in $O(n\log_2n)$ time, hence the algorithm we described above is the FFT itself.
+The Fourier coefficients correspond exactly to $\vec{a}$ in the equation $\frac{1}{n}\bar{V}\vec{y}=\vec{a}$ in the previous subsection if we let $\vec{y} = (F(0),F(1),\cdots,F(k)) = \vec{F}$. Following this trend, the inverse opertaion would simply be $V\vec{F} = \vec{y}$. We have already shown that this transformation could be done in $O(n\log_2n)$ time, hence the algorithm we described above is the FFT/IFFT.
 
 In the case of converting representations of polynomials, the coefficient form corresponds exactly to the frequency space one would conventionally denote in Fourier analysis, as a coefficient vector tells us exactly how much of each power of $x$ a given polynomial has. Analogously with samples, they are in the time space. Once this realization has been made, it is immediately clear that we have used exactly the convolution theorem for inverse Fourier transform: 
 \begin{eqnarray*}
